@@ -1127,7 +1127,26 @@ class PlacesViewController: ViewController, UISearchBarDelegate, ArticlePopoverV
         mapListToggle.selectedSegmentIndex = 0
         viewMode = .map
     }
-    
+
+    @objc func performLocationSerach(location: CLLocation?, name: String?) {
+        var region: MKCoordinateRegion? = location.flatMap {
+            .init(
+                center: .init(latitude: $0.coordinate.latitude, longitude: $0.coordinate.longitude),
+                span: .init(latitudeDelta: 0.15, longitudeDelta: 0.15)
+            )
+        }
+        currentSearch = .init(
+            filter: .top,
+            type: .location,
+            origin: .user,
+            sortStyle: .none,
+            string: name,
+            region: region,
+            localizedDescription: nil,
+            searchResult: nil
+        )
+    }
+
     func selectArticlePlace(_ articlePlace: ArticlePlace) {
         mapView.selectAnnotation(articlePlace, animated: articlePlace.identifier != previouslySelectedArticlePlaceIdentifier)
         previouslySelectedArticlePlaceIdentifier = articlePlace.identifier
