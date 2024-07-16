@@ -270,13 +270,29 @@ __attribute__((annotate("returns_localized_nsstring"))) static inline NSString *
 }
 
 - (nullable CLLocation *)wmf_placeLocation {
-    NSString *latKey = @"lat";
-    NSString *longKey = @"long";
-    if (self.userInfo[latKey] == nil || self.userInfo[longKey] == nil) {
+    NSString *latitudeData = self.userInfo[@"lat"];
+    NSString *longitudeData = self.userInfo[@"long"];
+
+    if (latitudeData == nil || longitudeData == nil) {
         return nil;
     }
-    double latitude = [self.userInfo[latKey] doubleValue];
-    double longitude = [self.userInfo[longKey] doubleValue];
+
+    NSDecimalNumber *latitudeNumber = [NSDecimalNumber decimalNumberWithString:latitudeData];
+    NSDecimalNumber *longitudeNumber = [NSDecimalNumber decimalNumberWithString:longitudeData];
+
+    if ([latitudeNumber isEqualToNumber:[NSDecimalNumber notANumber]] || [longitudeNumber isEqualToNumber:[NSDecimalNumber notANumber]]) {
+        return nil;
+    }
+
+    NSDecimalNumberHandler *handler = [NSDecimalNumberHandler decimalNumberHandlerWithRoundingMode:NSRoundPlain
+                                                                                              scale:10
+                                                                                   raiseOnExactness:NO
+                                                                                    raiseOnOverflow:NO
+                                                                                   raiseOnUnderflow:NO
+                                                                                raiseOnDivideByZero:NO];
+
+    double latitude = [[latitudeNumber decimalNumberByRoundingAccordingToBehavior:handler] doubleValue];
+    double longitude = [[longitudeNumber decimalNumberByRoundingAccordingToBehavior:handler] doubleValue];
     return [[CLLocation alloc] initWithLatitude:(CLLocationDegrees)latitude longitude:(CLLocationDegrees)longitude];
 }
 
